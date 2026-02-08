@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Table List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+
+<div class="row">
+    <div class="col">
+        <h1 class="mb-4">Available tables</h1>
+
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Table number</th>
+                <th>Seats</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="table : ${tablesList}">
+                <td th:text="${table.id}">1</td>
+                <td th:text="'Table nr ' + ${table.tableNumber}">Table nr 1</td>
+                <td th:text="${table.seats}">4</td>
+                <td>
+                    <span th:if="${table.isActive}" class="badge bg-success">Available</span>
+                    <span th:unless="${table.isActive}" class="badge bg-danger">Occupied</span>
+                </td>
+                <td>
+                    <a th:href="@{/reserve/{id}(id=${table.id})}" class="btn btn-primary btn-sm">Reserve</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

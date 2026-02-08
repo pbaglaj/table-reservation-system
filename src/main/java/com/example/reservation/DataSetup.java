@@ -18,7 +18,7 @@ public class DataSetup {
               repository.saveAll(List.of(
                       new RestaurantTable(null, 1, 2, true),
                       new RestaurantTable(null, 2, 4, true),
-                      new RestaurantTable(null, 3, 6, true)
+                      new RestaurantTable(null, 3, 6, false)
               ));
               System.out.println("Created startup tables: " + repository.count());
           }
