@@ -24,7 +24,7 @@
             <tbody>
             <tr th:each="table : ${tablesList}">
                 <td th:text="${table.id}">1</td>
-                <td th:text="'Table nr ' + ${table.tableNumber}">Table nr 1</td>
+                <td th:text="'Table ' + ${table.tableNumber}">Table 1</td>
                 <td th:text="${table.seats}">4</td>
                 <td>
                     <span th:if="${table.isActive}" class="badge bg-success">Available</span>

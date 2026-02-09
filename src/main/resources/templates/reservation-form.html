@@ -13,7 +13,7 @@
 
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-        <form action="/reserve" method="post">
+        <form th:action="@{/reserve}" method="post">
             <input type="hidden" name="tableId" th:value="${tableId}">
 
             <div class="mb-3">
