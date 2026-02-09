@@ -10,6 +10,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.stream.Collectors;
 
 @Controller
@@ -67,6 +68,10 @@ public class ReservationController {
     private void prepareModelForView(Long tableId, LocalDate date, Model model) {
         model.addAttribute("tableId", tableId);
         model.addAttribute("selectedDate", date);
+        model.addAttribute("minDate", LocalDate.now());
+        boolean isToday = date.isEqual(LocalDate.now());
+        model.addAttribute("isToday", isToday);
+        model.addAttribute("currentHour", LocalTime.now().getHour());
         model.addAttribute("reservedHours",
                 reservationService.getReservationForTableAndDate(tableId, date)
                         .stream().map(r -> r.getStartTime().getHour()).collect(Collectors.toSet())
