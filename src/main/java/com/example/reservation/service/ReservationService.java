@@ -1,5 +1,6 @@
 package com.example.reservation.service;
 
+import com.example.reservation.dto.ReservationRequest;
 import com.example.reservation.model.Reservation;
 import com.example.reservation.model.RestaurantTable;
 import com.example.reservation.repository.ReservationRepository;
@@ -24,13 +25,13 @@ public class ReservationService {
     }
 
     @Transactional
-    public void makeReservation(Long tableId, LocalDateTime startTime, String name, String email) {
-        RestaurantTable table =  tableRepository.findById(tableId)
+    public void makeReservation(ReservationRequest request) {
+        RestaurantTable table =  tableRepository.findById(request.getTableId())
                 .orElseThrow(() -> new IllegalArgumentException("Table not found"));
 
-        LocalDateTime endTime = startTime.plusMinutes(60);
+        LocalDateTime endTime = request.getStartTime().plusMinutes(60);
 
-        List<Reservation> conflicts = reservationRepository.findOverlappingReservations(tableId, startTime, endTime);
+        List<Reservation> conflicts = reservationRepository.findOverlappingReservations(request.getTableId(), request.getStartTime(), endTime);
 
         if (!conflicts.isEmpty()) {
            throw new IllegalStateException("This table is occupied in selected hours!");
@@ -38,10 +39,10 @@ public class ReservationService {
 
         Reservation reservation = new Reservation();
         reservation.setRestaurantTable(table);
-        reservation.setStartTime(startTime);
-        reservation.setEndTime(endTime);
-        reservation.setCustomerName(name);
-        reservation.setCustomerEmail(email);
+        reservation.setStartTime(request.getStartTime());
+        reservation.setEndTime(request.getStartTime().plusMinutes(60));
+        reservation.setCustomerName(request.getName());
+        reservation.setCustomerEmail(request.getEmail());
 
         reservationRepository.save(reservation);
     }

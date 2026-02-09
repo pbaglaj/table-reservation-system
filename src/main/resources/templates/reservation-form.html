@@ -49,19 +49,32 @@
             </div>
         </div>
 
-        <form th:action="@{/reserve}" method="post" onsubmit="return validateForm()">
-            <input type="hidden" name="tableId" th:value="${tableId}">
-
-            <input type="hidden" id="startTime" name="startTime" required>
+        <form th:action="@{/reserve}" th:object="${reservationForm}" method="post" onsubmit="return validateForm()">
+            <input type="hidden" th:field="*{tableId}">
+            <input type="hidden" id="startTime" th:field="*{startTime}">
 
             <div class="mb-3">
                 <label class="form-label">Your name</label>
-                <input type="text" name="name" class="form-control" required>
+                <input type="text" th:field="*{name}" class="form-control"
+                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
+                    Name Error
+                </div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Email</label>
-                <input type="email" name="email" class="form-control" required>
+                <input type="email" th:field="*{email}" class="form-control"
+                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
+                    Email Error
+                </div>
+            </div>
+
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+            <div th:if="${#fields.hasErrors('startTime')}" class="alert alert-danger">
+                <span th:errors="*{startTime}">Date Error</span>
             </div>
 
             <button type="submit" class="btn btn-success w-100" id="submitBtn" disabled>Submit reservation</button>

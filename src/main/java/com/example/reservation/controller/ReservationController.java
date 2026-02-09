@@ -1,19 +1,15 @@
 package com.example.reservation.controller;
 
-import com.example.reservation.model.Reservation;
+import com.example.reservation.dto.ReservationRequest;
 import com.example.reservation.service.ReservationService;
+import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -31,37 +27,49 @@ public class ReservationController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             Model model) {
 
-        if (date == null) {
-            date = LocalDate.now();
-        }
+        if (date == null) date =  LocalDate.now();
 
-        List<Reservation> reservations = reservationService.getReservationForTableAndDate(tableId, date);
+        ReservationRequest form = new ReservationRequest();
+        form.setTableId(tableId);
 
-        Set<Integer> reservedHours = reservations.stream()
-                        .map(r -> r.getStartTime().getHour())
-                        .collect(Collectors.toSet());
+        model.addAttribute("reservationForm", form);
 
-        model.addAttribute("tableId", tableId);
-        model.addAttribute("selectedDate", date);
-        model.addAttribute("reservedHours", reservedHours);
+        prepareModelForView(tableId, date, model);
 
         return "reservation-form";
     }
 
     @PostMapping("/reserve")
     public String submitReservation(
-            @RequestParam Long tableId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
-            @RequestParam String name,
-            @RequestParam String email,
+            @Valid @ModelAttribute("reservationForm")ReservationRequest request,
+            BindingResult bindingResult,
             Model model) {
+
+        LocalDate dateForView = (request.getStartTime() != null)
+                ? request.getStartTime().toLocalDate()
+                : LocalDate.now();
+
+        if(bindingResult.hasErrors()){
+            prepareModelForView(request.getTableId(), dateForView, model);
+            return "reservation-form";
+        }
+
         try {
-            reservationService.makeReservation(tableId, startTime, name, email);
+            reservationService.makeReservation(request);
             return "redirect:/tables?success";
         } catch (IllegalStateException e) {
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("tableId", tableId);
+            prepareModelForView(request.getTableId(), dateForView, model);
             return "reservation-form";
         }
+    }
+
+    private void prepareModelForView(Long tableId, LocalDate date, Model model) {
+        model.addAttribute("tableId", tableId);
+        model.addAttribute("selectedDate", date);
+        model.addAttribute("reservedHours",
+                reservationService.getReservationForTableAndDate(tableId, date)
+                        .stream().map(r -> r.getStartTime().getHour()).collect(Collectors.toSet())
+        );
     }
 }
