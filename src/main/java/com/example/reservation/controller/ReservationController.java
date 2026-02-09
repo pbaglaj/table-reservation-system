@@ -1,5 +1,6 @@
 package com.example.reservation.controller;
 
+import com.example.reservation.model.Reservation;
 import com.example.reservation.service.ReservationService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -9,7 +10,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 public class ReservationController {
@@ -21,8 +26,25 @@ public class ReservationController {
     }
 
     @GetMapping("/reserve/{tableId}")
-    public String showForm(@PathVariable Long tableId, Model model) {
+    public String showForm(
+            @PathVariable Long tableId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            Model model) {
+
+        if (date == null) {
+            date = LocalDate.now();
+        }
+
+        List<Reservation> reservations = reservationService.getReservationForTableAndDate(tableId, date);
+
+        Set<Integer> reservedHours = reservations.stream()
+                        .map(r -> r.getStartTime().getHour())
+                        .collect(Collectors.toSet());
+
         model.addAttribute("tableId", tableId);
+        model.addAttribute("selectedDate", date);
+        model.addAttribute("reservedHours", reservedHours);
+
         return "reservation-form";
     }
 

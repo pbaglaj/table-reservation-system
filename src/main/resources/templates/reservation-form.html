@@ -3,6 +3,12 @@
 <head>
     <title>Table reservation</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .time-slot {
+            width: 80px;
+            margin: 5px;
+        }
+    </style>
 </head>
 <body class="container mt-5">
 <div class="card col-md-6 offset-md-3">
@@ -13,8 +19,40 @@
 
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-        <form th:action="@{/reserve}" method="post">
+        <div class="mb-4">
+            <label class="form-label fw-bold">1. Select date:</label>
+            <form th:action="@{/reserve/{id}(id=${tableId})}" method="get">
+                <input type="date" name="date" class="form-control"
+                       th:value="${selectedDate}"
+                       onchange="this.form.submit()">
+            </form>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label fw-bold">2. Select time:</label>
+            <div class="d-flex flex-wrap justify-content-center">
+                <th:block th:each="hour : ${#numbers.sequence(12, 21)}">
+
+                    <button type="button"
+                            th:disabled="${reservedHours.contains(hour)}"
+                            th:classappend="${reservedHours.contains(hour)} ? 'btn-danger' : 'btn-outline-success'"
+                            class="btn time-slot"
+                            th:text="${hour} + ':00'"
+                            th:onclick="'selectTime(' + ${hour} + ', this)'">
+                        12:00
+                    </button>
+
+                </th:block>
+            </div>
+            <div class="text-center mt-2">
+                <small class="text-muted" id="selectedTimeDisplay">No time selected</small>
+            </div>
+        </div>
+
+        <form th:action="@{/reserve}" method="post" onsubmit="return validateForm()">
             <input type="hidden" name="tableId" th:value="${tableId}">
+
+            <input type="hidden" id="startTime" name="startTime" required>
 
             <div class="mb-3">
                 <label class="form-label">Your name</label>
@@ -26,16 +64,52 @@
                 <input type="email" name="email" class="form-control" required>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Date and time of reservation</label>
-                <input type="datetime-local" name="startTime" class="form-control" required>
-                <small class="text-muted">Reservation lasts 1 hour.</small>
-            </div>
-
-            <button type="submit" class="btn btn-success w-100">Submit reservation</button>
+            <button type="submit" class="btn btn-success w-100" id="submitBtn" disabled>Submit reservation</button>
             <a href="/tables" class="btn btn-secondary w-100 mt-2">Cancel</a>
         </form>
     </div>
 </div>
+
+<script th:inline="javascript">
+    /* Pobieramy wybraną datę z Thymeleaf do JS */
+    const selectedDate = /*[[${selectedDate.toString()}]]*/ 'default';
+    let selectedHour = null;
+
+    function selectTime(hour, btnElement) {
+        // Resetujemy style wszystkich przycisków sukcesu (odznaczamy poprzedni)
+        document.querySelectorAll('.btn-outline-success').forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.remove('bg-success');
+            btn.classList.remove('text-white');
+        });
+
+        // Zaznaczamy kliknięty przycisk
+        btnElement.classList.add('active');
+        btnElement.classList.add('bg-success');
+        btnElement.classList.add('text-white');
+
+        // Zapamiętujemy godzinę i aktualizujemy widok
+        selectedHour = hour;
+        document.getElementById('selectedTimeDisplay').innerText =
+            'Selected: ' + selectedDate + ' at ' + hour + ':00';
+
+        // Formatujemy datę do ISO (yyyy-MM-ddTHH:mm:ss) dla backendu
+        // Dodajemy wiodące zero dla godziny jeśli potrzebne (choć tu startujemy od 12)
+        const timeString = (hour < 10 ? '0' : '') + hour + ':00:00';
+        document.getElementById('startTime').value = selectedDate + 'T' + timeString;
+
+        // Odblokowujemy przycisk submit
+        document.getElementById('submitBtn').disabled = false;
+    }
+
+    function validateForm() {
+        if (!selectedHour) {
+            alert("Please select a time!");
+            return false;
+        }
+        return true;
+    }
+</script>
+
 </body>
 </html>

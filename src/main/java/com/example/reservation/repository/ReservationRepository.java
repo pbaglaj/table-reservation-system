@@ -22,4 +22,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("newStart") LocalDateTime newStart,
             @Param("newEnd") LocalDateTime newEnd
     );
+
+    @Query("SELECT r FROM Reservation r " +
+            "WHERE r.restaurantTable.id = :tableId " +
+            "AND r.startTime >= :start " +
+            "AND r.startTime <= :end")
+    List<Reservation> findReservationsForTableOnDate(
+            @Param("tableId") Long tableId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 }

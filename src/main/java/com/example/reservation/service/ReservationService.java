@@ -7,7 +7,9 @@ import com.example.reservation.repository.TableRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -42,5 +44,12 @@ public class ReservationService {
         reservation.setCustomerEmail(email);
 
         reservationRepository.save(reservation);
+    }
+
+    public List<Reservation> getReservationForTableAndDate(Long tableId, LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+        return reservationRepository.findReservationsForTableOnDate(tableId, startOfDay, endOfDay);
     }
 }

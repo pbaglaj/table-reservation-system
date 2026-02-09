@@ -31,7 +31,10 @@
                     <span th:unless="${table.isActive}" class="badge bg-danger">Occupied</span>
                 </td>
                 <td>
-                    <a th:href="@{/reserve/{id}(id=${table.id})}" class="btn btn-primary btn-sm">Reserve</a>
+                    <a th:if="${table.isActive}"
+                       th:href="@{/reserve/{id}(id=${table.id})}"
+                       class="btn btn-primary btn-sm">Book
+                    </a>
                 </td>
             </tr>
             </tbody>
