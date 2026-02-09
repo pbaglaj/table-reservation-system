@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Admin panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Admin panel</h1>
+  <form th:action="@{/logout}" method="post">
+    <button class="btn btn-danger">Logout</button>
+  </form>
+</div>
+
+<div class="row">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header bg-success text-white">Add new table</div>
+      <div class="card-body">
+        <form th:action="@{/admin/add-table}" th:object="${newTable}" method="post">
+          <div class="mb-3">
+            <label>Table number</label>
+            <input type="number" th:field="*{tableNumber}" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label>Number of seats</label>
+            <input type="number" th:field="*{seats}" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-success w-100">Add</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <h3>Table list</h3>
+    <table class="table table-bordered">
+      <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Number</th>
+        <th>Seats</th>
+        <th>Status</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="table : ${tables}">
+        <td th:text="${table.id}"></td>
+        <td th:text="${table.tableNumber}"></td>
+        <td th:text="${table.seats}"></td>
+        <td>
+          <span th:text="${table.isActive ? 'Active' : 'Inactive'}"
+                th:class="${table.isActive ? 'text-success' : 'text-danger'}">
+          </span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>
